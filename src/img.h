@@ -26,8 +26,10 @@ class image{
     height = 100;
     rgb = 255;
   }
+  
   image(string identificator, int w, int h, int max): id(identificator), width(w), height(h), rgb(max){}
-  void init() {
+  
+  void init(ifstream &in, int border, int space) {
     for (int i = 0; i < height; i++) {
         red[i] = new unsigned char[width];
         green[i] = new unsigned char[width];
@@ -36,8 +38,41 @@ class image{
 
     if (id  == "P3") {
       id = "P6";
-      for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
+      for (int i = border; i < height-border-space; i++) {
+        for (int j = border; j < width-border; j++) {
+          int pixel;
+          in >> pixel;
+          red[i][j] = (unsigned char) pixel;
+          in >> pixel;
+          green[i][j] = (unsigned char) pixel;
+          in >> pixel;
+          blue[i][j] = (unsigned char) pixel;
+        }
+      }
+    }
+    else if (id == "P6") {
+      for (int i = border; i < height - border - space; i++) {
+        for (int j = border; j < width - border; j++) {
+          red[i][j] = (unsigned char)in.get();
+          green[i][j] = (unsigned char)in.get();
+          blue[i][j] = (unsigned char)in.get();
+        }
+      }
+    }
+    in.close();
+  }
+
+  void init_std(int border, int space) {
+    for (int i = 0; i < height; i++) {
+        red[i] = new unsigned char[width];
+        green[i] = new unsigned char[width];
+        blue[i] = new unsigned char[width];
+    }
+
+    if (id  == "P3") {
+      id = "P6";
+      for (int i = border; i < height-border-space; i++) {
+        for (int j = border; j < width-border; j++) {
           int pixel;
           cin >> pixel;
           red[i][j] = (unsigned char) pixel;
@@ -50,8 +85,8 @@ class image{
       }
     }
     else if (id == "P6") {
-      for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
+      for (int i = border; i < height - border - space; i++) {
+        for (int j = border; j < width - border; j++) {
           red[i][j] = (unsigned char)getchar();
           green[i][j] = (unsigned char)getchar();
           blue[i][j] = (unsigned char)getchar();
@@ -60,16 +95,40 @@ class image{
     }
   }
 
-  void print() {
-    cout << id << "\n";
-    cout << width << " " << height << "\n";
-    cout << rgb << "\n";
+  void print(ofstream &out) {
+    out << id << endl;
+    out << width << " " << height << endl;
+    out << rgb << endl;
     for (int i = 0; i < height; i++) {
       for (int j = 0; j < width; j++) {
-        cout << red[i][j] << green[i][j] << blue[i][j];
+        out << red[i][j] << green[i][j] << blue[i][j];
+      }
+    }
+    out.close();
+  }
+
+  void enlarge_polaroid(int border,int space) {
+    for (int i = 0; i < height; i++) {
+      for (int j = 0; j < width; j++) {
+        if (i < border || i >= height-border-space || j < border || j >= width-border) {
+          red[i][j] = 255;
+          green[i][j] = 255;
+          blue[i][j] = 255;
+        }
       }
     }
   }
+
+  // void dalloc() {
+  //   for (int i = 0; i < height; i++) {
+  //     delete[] red[i];
+  //     delete[] green[i];
+  //     delete[] blue[i];
+  //   }
+  //   delete[] red;
+  //   delete[] green;
+  //   delete[] blue;
+  // }
 
   int get_width() {
     return width;
@@ -90,52 +149,13 @@ class image{
   int get_red (int i, int j) {
     return red[i][j];
   }
+  
   int get_green(int i, int j) {
     return green[i][j];
   }
+  
   int get_blue(int i, int j) {
     return blue[i][j];
-  }
-
-  void transfer(image temp) {
-    for (int i = 0; i < height; i++) {
-      for (int j = 0; j < width; j++) {
-        red[i][j] = temp.get_red(i,j);
-        green[i][j] = temp.get_green(i,j);
-        blue[i][j] = temp.get_blue(i,j);
-      }
-    }
-  }
-
-  void enlarge_polaroid(image img) {
-    for (int i = 0; i < height; i++) {
-      for (int j = 0; j < width; j++) {
-        if (i < 25 || i >= height - 25) {
-          red[i][j] = (unsigned char) 255;
-          green[i][j] = (unsigned char) 255;
-          blue[i][j] = (unsigned char) 255;
-        }
-        else if (j < 25 || j >= width - 25) {
-          red[i][j] = (unsigned char) 255;
-          green[i][j] = (unsigned char) 255;
-          blue[i][j] = (unsigned char) 255;
-        }
-        else {
-          red[i][j] = ()
-        }
-      }
-    }
-  }
-
-  void dalloc() {
-    for (int i = 0; i < height; i++) {
-      delete[] red[i];
-      delete[] green[i];
-      delete[] blue[i];
-    }
-    delete[] red;
-    delete[] green;
-    delete[] blue;
   }
 
   // ~image(){

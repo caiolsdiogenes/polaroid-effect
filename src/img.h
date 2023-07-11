@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <climits>
 #include <deque>
+#include "font.h"
 
 
 using namespace std;
@@ -19,6 +20,7 @@ class image{
   unsigned char **red = new unsigned char*[height];
   unsigned char **green = new unsigned char*[height];
   unsigned char **blue = new unsigned char*[height];
+  
   public:
   image() {
     id = "P6";
@@ -119,51 +121,34 @@ class image{
     }
   }
 
-  // void dalloc() {
-  //   for (int i = 0; i < height; i++) {
-  //     delete[] red[i];
-  //     delete[] green[i];
-  //     delete[] blue[i];
-  //   }
-  //   delete[] red;
-  //   delete[] green;
-  //   delete[] blue;
-  // }
-
-  int get_width() {
-    return width;
+  void message(const Glyph *character, string msg, int space, int border, int k) {
+    int i = height - border - space;
+    int j = border + (k * character-> get_device_width_x());
+    for (int w = 0; w < character -> get_width(); w++) {
+      for (int h = character -> get_height()-1; h >= 0; h--) {
+        if (character -> get_bit(w,h)) {
+          red[i+h-character->get_y_offset()][j+w-character->get_x_offset()] = 0;
+          blue[i+h-character->get_y_offset()][j+w-character->get_x_offset()] = 0;
+          green[i+h-character->get_y_offset()][j+w-character->get_x_offset()] = 0;
+        }
+      }
+    }
   }
 
-  int get_height() {
-    return height;
-  }
-
-  string get_id() {
-    return id;
-  }
-
-  int get_max () {
-    return rgb;
-  }
-
-  int get_red (int i, int j) {
-    return red[i][j];
-  }
-  
-  int get_green(int i, int j) {
-    return green[i][j];
-  }
-  
-  int get_blue(int i, int j) {
-    return blue[i][j];
-  }
+  int get_width() {return width;}
+  int get_height() {return height;}
+  string get_id() {return id;}
+  int get_max () {return rgb;}
+  int get_red (int i, int j) {return red[i][j];}
+  int get_green(int i, int j) {return green[i][j];}
+  int get_blue(int i, int j) {return blue[i][j];}
 
   // ~image(){
   //   for (int i = 0; i < height; i++) {
   //     delete[] red[i];
   //     delete[] green[i];
   //     delete[] blue[i];
-  // }
+  //   }
   //   delete[] red;
   //   delete[] green;
   //   delete[] blue;

@@ -22,8 +22,6 @@ void input(image &img, ifstream &in, int border, int space) {
 
     image temp(id,width+(2*border),height+(2*border+space),rgb);
 
-    //img.dalloc();
-
     img = temp;
 
     img.init(in,border,space);
@@ -37,8 +35,6 @@ void input_std(image &img, int border, int space) {
     cin.ignore(INT_MAX, '\n');
 
     image temp(id,width+(2*border),height+(2*border)+space,rgb);
-
-    //img.dalloc();
 
     img = temp;
 
@@ -68,11 +64,8 @@ int main(int argc, char const *argv[]) {
   int border = 25;
   int space = 50;
   string filename = "../fonts/ib16x16u.bdf";
-  
   string msg;
-
-  cin >> msg;
-
+  getline(cin, msg);
   if (argc != 1) {
    for (int i = 1; i < argc; i++) {
       if (strcmp(argv[i], "-h") == 0) {
@@ -104,7 +97,7 @@ int main(int argc, char const *argv[]) {
    }
   }
   else {
-    cerr << "Passe -h em linha de comando para ter informações sobre o uso do programa!\n";
+    cerr << "O usuário deverá passar argumentos em linha de comando para que o programa possa funcionar!\n\n-h(help): informa sobre o funcionamento do programa.\n";
     return 0;
   }
   image img;
@@ -117,17 +110,17 @@ int main(int argc, char const *argv[]) {
     in.close();
   }
   
-
   enlarge(img,border,space);
 
   Font bdf;
 
   bdf.read_bdf(filename);
 
-  Glyph character;
+  for (int k = 0; k < msg.size(); k++) {
+    const Glyph *character = bdf.get_glyph((int)msg[k]);
+    img.message(character,msg,space,border,k);
+  }
 
-  character.
-  
   if (out.is_open()) {
     output(img,out);
   }

@@ -27,7 +27,8 @@ class Font {
    * @param encoding código do caractere
    * @return ponteiro para o glifo correspondente ou nullptr se não existir
   */
-  const Glyph* get_glyph(int encoding);
+  const Glyph* get_glyph(int encoding); 
+
 };
 
 #endif  // __FONT_H__

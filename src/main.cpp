@@ -9,10 +9,18 @@
 #include "glyph.h"
 #include "font.h"
 #include "img.h"
+#include "img.cpp"
 
 using namespace std;
-
-void input(image &img, ifstream &in, int border, int space) {
+/**
+ * Lê a imagem do arquivo passado pelo usuário em linha de comando. 
+ * Retorna um objeto da classe image.
+ * 
+ * @param in Arquivo que contém os dados da imagem e será usado para a leitura da imagem.
+ * @param border Tamanho da borda branca a ser adicionada na imagem.
+ * @param space Tamanho da borda extra a ser adicionada na base da imagem.
+*/
+image input(ifstream &in, int border, int space) {
     string id;
     int width, height;
     int rgb;
@@ -20,52 +28,68 @@ void input(image &img, ifstream &in, int border, int space) {
     in >> id >> width >> height >> rgb;
     in.ignore(INT_MAX, '\n');
 
-    image temp(id,width+(2*border),height+(2*border+space),rgb);
-
-    img = temp;
+    image img(id,width+(2*border),height+(2*border+space),rgb);
 
     img.init(in,border,space);
-}
-void input_std(image &img, int border, int space) {
-    string id;
-    int width, height;
-    int rgb;
 
-    cin >> id >> width >> height >> rgb;
-    cin.ignore(INT_MAX, '\n');
-
-    image temp(id,width+(2*border),height+(2*border)+space,rgb);
-
-    img = temp;
-
-    img.init_std(border,space);
+    return img;
 }
 
-void output(image img, ofstream &out) {
+/**
+ * Escreve na imagem cada caractere da mensagem passada pelo usuário.
+ * 
+ * @param bdf A fonte que contém os caracteres que vão ser escritos.
+ * @param img A imagem na qual os caracteres vão ser escritos.
+ * @param border Tamanho da borda branca adicionada na imagem.
+ * @param space Tamanho da borda extra adicionada na base da imagem.
+*/
+void write(Font &bdf, image &img, int border, int space, string msg) {
+  int j;
+  for (int k = 0; k < msg.size(); k++) {
+    const Glyph *character = bdf.get_glyph((int)msg[k]);
+    if (k == 0) j = border;
+    img.message(character,space,border,j);
+  }
+}
+
+/**
+ * Imprime a imagem no arquivo passado pelo usuário em linha de comando.
+ * Caso o usuário não tenha passado nenhum arquivo de saída, um arquivo será assumido como default.
+ * 
+ * @param img Imagem a ser imprimida.
+ * @param out Arquivo de saída de dados.
+*/
+void output(image &img, ofstream &out) {
     img.print(out);
 }
 
+/**
+ * Adiciona à imagem uma borda branca + uma borda adicional na base da imagem.
+ * 
+ * @param img Imagem na qual vão ser adicionadas as bordas.
+ * @param border Tamanho da borda branca a ser adicionada na imagem.
+ * @param space Tamanho da borda extra a ser adicionada na base da imagem. 
+*/
 void enlarge(image &img, int border, int space) {
   img.enlarge_polaroid(border,space);
 }
 
-int main(int argc, char const *argv[]) {
-
-  // TO DO
-  // 1) ler a imagem input_file
-  // 2) alterar a imagem lida inserindo o efeito polaroid usando
-  //    como border como tamanho da borda e space como espaço de texto.
-  // 3) ler a fonte font_name
-  // 4) inserir o texto msg na imagem usando a fonte lida
-  // 5) salvar a imagem resultante em output_file
-
-  ofstream out;
-  ifstream in;
-  int border = 25;
-  int space = 50;
-  string filename = "../fonts/ib16x16u.bdf";
-  string msg;
-  getline(cin, msg);
+/**
+ * Lê e interpreta os argumentos passados em linha de comando pelo usuário.
+ * 
+ * @param argc Número de argumentos passados em linha de comando.
+ * @param argv Vetor de string que armazena os argumentos passados em linha de comando.
+ * @param out Arquivo de saída de dados.
+ * @param in Arquivo de entrada de dados.
+ * @param border Tamanho da borda branca a ser adicionada na imagem.
+ * @param space Tamanho da borda extra a ser adicionada na base da imagem.
+ * @param filename Arquivo no qual vai ser lido a fonte.
+ * @param ipt Nome do arquivo de entrada de dados.
+ * @param otp Nome do arquivo de saída de dados.
+ * @param help Booleano que indica se vai ser necessário imprimir o help na saída padrão.
+ * @param effect Efeito a ser aplicado na imagem.
+*/
+void arg(int argc, char const *argv[], ofstream &out, ifstream &in, int &border, int &space, string &filename, string &ipt, string &otp, bool &help, string &effect) {
   if (argc != 1) {
    for (int i = 1; i < argc; i++) {
       if (strcmp(argv[i], "-h") == 0) {
@@ -75,7 +99,8 @@ int main(int argc, char const *argv[]) {
         cout << "\n-f (font): para indicar o caminho do arquivo de fonte a ser usado no texto da imagem.\n";
         cout << "\n-b (border): para indicar a largura das bordas a serem acrescentadas ao redor da imagem.\n";
         cout << "\n-s (space): para indicar a largura da base adicional na borda da imagem.\n";
-        return 0;
+        cout << "\n-e (effect): para selecionar um efeito adicional (gray, sepia, summer, winter, inverse) para ser aplicado na imagem.\n";
+        help = true;
       }
       else if (strcmp(argv[i], "-i") == 0) {
         string ipt = argv[i+1];
@@ -94,32 +119,71 @@ int main(int argc, char const *argv[]) {
       else if (strcmp(argv[i], "-s") == 0) {
         space = stoi(argv[i+1]);
       }
+      else if (strcmp(argv[i], "-e") == 0) {
+        effect = argv[i+1];
+      }
    }
   }
   else {
     cerr << "O usuário deverá passar argumentos em linha de comando para que o programa possa funcionar!\n\n-h(help): informa sobre o funcionamento do programa.\n";
-    return 0;
   }
-  image img;
+}
 
-  if (in.is_open()) {
-    input(img,in,border,space);
-  }
-  else {
-    input_std(img,border,space);
-    in.close();
-  }
+/**
+ * Aplica um efeito na imagem.
+ * 
+ * @param img Imagem na qual o efeito será aplicado.
+ * @param effect Efeito a ser aplicado na imagem.
+ * @param border Tamanho da borda branca a ser adicionada da imagem.
+ * @param space Tamanho da borda extra a ser adicionada na base da imagem.
+*/
+void applie(image &img, string effect, int border, int space) {
+  if (effect == "default") return;
+  else if (effect == "gray") img.gray();
+  else if (effect == "sepia") img.sepia(border,space);
+  else if (effect == "summer") img.summer(border,space);
+  else if (effect == "winter") img.winter(border,space);
+  else if (effect == "inverse") img.inverse(border,space);
+}
+
+int main(int argc, char const *argv[]) {
+
+  // TO DO
+  // 1) ler a imagem input_file
+  // 2) alterar a imagem lida inserindo o efeito polaroid usando
+  //    como border como tamanho da borda e space como espaço de texto.
+  // 3) ler a fonte font_name
+  // 4) inserir o texto msg na imagem usando a fonte lida
+  // 5) salvar a imagem resultante em output_file
+
+  ofstream out;
+  ifstream in;
+  int border = 25;
+  int space = 50;
+  string filename = "../fonts/ib16x16u.bdf";
+  string ipt;
+  string otp;
+  string effect = "default";
+  bool help = false;
+
+  arg(argc,argv,out,in,border,space,filename,ipt,otp,help,effect);
+
+  if (help || argc == 0) return 0;
+
+  string msg;
+  getline(cin, msg);
+  
+  image img = input(in,border,space);
   
   enlarge(img,border,space);
+
+  applie(img,effect,border,space);
 
   Font bdf;
 
   bdf.read_bdf(filename);
 
-  for (int k = 0; k < msg.size(); k++) {
-    const Glyph *character = bdf.get_glyph((int)msg[k]);
-    img.message(character,msg,space,border,k);
-  }
+  write(bdf,img,border,space,msg);
 
   if (out.is_open()) {
     output(img,out);

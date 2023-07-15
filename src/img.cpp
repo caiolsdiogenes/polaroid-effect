@@ -12,66 +12,66 @@
 using namespace std;
 
 image::image() {
-    id = "P6";
-    width = 100;
-    height = 100;
-    rgb = 255;
+  id = "P6";
+  width = 100;
+  height = 100;
+  rgb = 255;
 }
 
 image::~image(){
-    for (int i = 0; i < height; i++) {
-        delete[] red[i];
-        delete[] green[i];
-        delete[] blue[i];
-    }
-    delete[] red;
-    delete[] green;
-    delete[] blue;
+  for (int i = 0; i < height; i++) {
+      delete[] red[i];
+      delete[] green[i];
+      delete[] blue[i];
+  }
+  delete[] red;
+  delete[] green;
+  delete[] blue;
 }
   
 void image::init(ifstream &in, int border, int space) {
-    for (int i = 0; i < height; i++) {
-        red[i] = new unsigned char[width];
-        green[i] = new unsigned char[width];
-        blue[i] = new unsigned char[width];
-    }
-
-    if (id  == "P3") {
-      id = "P6";
-      for (int i = border; i < height-border-space; i++) {
-        for (int j = border; j < width-border; j++) {
-          int pixel;
-          in >> pixel;
-          red[i][j] = (unsigned char) pixel;
-          in >> pixel;
-          green[i][j] = (unsigned char) pixel;
-          in >> pixel;
-          blue[i][j] = (unsigned char) pixel;
-        }
-      }
-    }
-    else if (id == "P6") {
-      for (int i = border; i < height - border - space; i++) {
-        for (int j = border; j < width - border; j++) {
-          red[i][j] = (unsigned char)in.get();
-          green[i][j] = (unsigned char)in.get();
-          blue[i][j] = (unsigned char)in.get();
-        }
-      }
-    }
-    in.close();
+  for (int i = 0; i < height; i++) {
+    red[i] = new unsigned char[width];
+    green[i] = new unsigned char[width];
+    blue[i] = new unsigned char[width];
   }
 
-  void image::print(ofstream &out) {
-    out << id << endl;
-    out << width << " " << height << endl;
-    out << rgb << endl;
-    for (int i = 0; i < height; i++) {
-      for (int j = 0; j < width; j++) {
-        out << red[i][j] << green[i][j] << blue[i][j];
+  if (id  == "P3") {
+    id = "P6";
+    for (int i = border; i < height-border-space; i++) {
+      for (int j = border; j < width-border; j++) {
+        int pixel;
+        in >> pixel;
+        red[i][j] = (unsigned char) pixel;
+        in >> pixel;
+        green[i][j] = (unsigned char) pixel;
+        in >> pixel;
+        blue[i][j] = (unsigned char) pixel;
       }
     }
-    out.close();
+  }
+  else if (id == "P6") {
+    for (int i = border; i < height - border - space; i++) {
+      for (int j = border; j < width - border; j++) {
+        red[i][j] = (unsigned char)in.get();
+        green[i][j] = (unsigned char)in.get();
+        blue[i][j] = (unsigned char)in.get();
+      }
+    }
+  }
+  in.close();
+}
+
+void image::print(ofstream &out) {
+  out << id << endl;
+  out << width << " " << height << endl;
+  out << rgb << endl;
+  for (int i = 0; i < height; i++) {
+    for (int j = 0; j < width; j++) {
+      out << red[i][j] << green[i][j] << blue[i][j];
+    }
+  }
+  out.close();
   }
 
   void image::enlarge_polaroid(int border,int space) {
@@ -103,13 +103,13 @@ void image::init(ifstream &in, int border, int space) {
   void image::gray() {
     for (int i = 0; i < height; i ++) {
         for (int j = 0; j < width; j++) {
-            int avg = (red[i][j] + green[i][j] + blue[i][j])/3;
-            red[i][j] = avg;
-            green[i][j] = avg;
-            blue[i][j] = avg; 
+          int avg = (red[i][j] + green[i][j] + blue[i][j])/3;
+          red[i][j] = avg;
+          green[i][j] = avg;
+          blue[i][j] = avg; 
         }
     }
-}
+  }
 
 /**
  * Aplica efeito sepia na imagem.

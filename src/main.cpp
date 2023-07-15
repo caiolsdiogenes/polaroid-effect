@@ -60,7 +60,7 @@ void write(Font &bdf, image &img, int border, int space, string msg) {
  * @param out Arquivo de saída de dados.
 */
 void output(image &img, ofstream &out) {
-    img.print(out);
+  img.print(out);
 }
 
 /**

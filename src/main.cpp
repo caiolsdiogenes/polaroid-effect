@@ -45,7 +45,7 @@ image input(ifstream &in, int border, int space) {
 */
 void write(Font &bdf, image &img, int border, int space, string msg) {
   int j;
-  for (int k = 0; k < msg.size(); k++) {
+  for (int k = 0; k < (int)msg.size(); k++) {
     const Glyph *character = bdf.get_glyph((int)msg[k]);
     if (k == 0) j = border;
     img.message(character,space,border,j);
@@ -88,8 +88,9 @@ void enlarge(image &img, int border, int space) {
  * @param otp Nome do arquivo de saída de dados.
  * @param help Booleano que indica se vai ser necessário imprimir o help na saída padrão.
  * @param effect Efeito a ser aplicado na imagem.
+ * @param noArg Booleano que indica se o programa foi chamado sem passar nenhum argumento em linha de comando.
 */
-void arg(int argc, char const *argv[], ofstream &out, ifstream &in, int &border, int &space, string &filename, string &ipt, string &otp, bool &help, string &effect) {
+void arg(int argc, char const *argv[], ofstream &out, ifstream &in, int &border, int &space, string &filename, string &ipt, string &otp, bool &help, string &effect, bool &noArg) {
   if (argc != 1) {
    for (int i = 1; i < argc; i++) {
       if (strcmp(argv[i], "-h") == 0) {
@@ -126,6 +127,7 @@ void arg(int argc, char const *argv[], ofstream &out, ifstream &in, int &border,
   }
   else {
     cerr << "O usuário deverá passar argumentos em linha de comando para que o programa possa funcionar!\n\n-h(help): informa sobre o funcionamento do programa.\n";
+    noArg = true;
   }
 }
 
@@ -165,10 +167,11 @@ int main(int argc, char const *argv[]) {
   string otp;
   string effect = "default";
   bool help = false;
+  bool noArg = false;
 
-  arg(argc,argv,out,in,border,space,filename,ipt,otp,help,effect);
+  arg(argc,argv,out,in,border,space,filename,ipt,otp,help,effect,noArg);
 
-  if (help || argc == 0) return 0;
+  if (help || noArg) return 0;
 
   string msg;
   getline(cin, msg);
